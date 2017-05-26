@@ -19,6 +19,7 @@ System.out.println(output_text1);
 
 
 -----------语料模型用法-----------
+
 //读取文件并保存语料
 
 Corpus corpus = new Corpus(inputFile, false);
