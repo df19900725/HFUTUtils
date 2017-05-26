@@ -16,3 +16,27 @@ NLPIR nlpir = new NLPIR("d:/nlpir/lib/win64/NLPIR","d:/nlpir/");
 String output_text1 = nlpir.seg(input_text1, 0);
 
 System.out.println(output_text1);
+
+
+-----------语料模型用法-----------
+//读取文件并保存语料
+
+Corpus corpus = new Corpus(inputFile, false);
+
+corpus.saveCorpus(inputFile);
+
+//载入之前保存的语料
+
+Corpus corpusLoading = new Corpus();
+
+corpusLoading.loadCorpus(inputFile);
+
+//输入是文件夹的测试，去掉false参数即可
+
+String inputDir = "D:/test";
+
+String outputDir = "d:/test_out";
+
+Corpus corpusDir = new Corpus(inputDir);
+
+corpusDir.saveCorpus(outputDir);
