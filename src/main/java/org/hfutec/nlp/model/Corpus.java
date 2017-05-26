@@ -49,7 +49,9 @@ public class Corpus {
 
   public Corpus(){}
 
-  //输入文件是一个目录
+  /********
+   * 输入是文件夹的构造方法
+   */
   public Corpus(String input_dir ){
     this(input_dir, " ");
   }
@@ -68,7 +70,9 @@ public class Corpus {
 
   }
 
-  //输入是一个文件，一行代表一个文档
+  /********
+   * 输入是文件的构造方法，多了一个参数
+   */
   public Corpus( String input_file, boolean isInputADirectory ){ this(input_file," ", isInputADirectory); }
 
   public Corpus( String input_file, String delimiter, boolean isInputADirectory ){
