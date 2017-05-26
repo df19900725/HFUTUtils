@@ -20,6 +20,8 @@ System.out.println(output_text1);
 
 -----------语料模型用法-----------
 
+本程序可以自动将这些单词变成索引形式，并将文档用SparseVSM表示。保存后生成三个文件：docIndex、wordIndex、sparseVSM。分别表示文档-索引、单词-索引和稀疏向量空间模型。（注意，输入语料是文档的时候，VSM一行对应之前的一行，因此docIndex为空。输入语料是文件夹时候，docIndex是文件名字-索引，VSM是按索引0-ndocs来的）。
+
 //读取文件并保存语料
 
 Corpus corpus = new Corpus(inputFile, false);
