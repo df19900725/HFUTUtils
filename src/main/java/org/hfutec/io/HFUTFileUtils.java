@@ -2,6 +2,7 @@ package org.hfutec.io;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
@@ -19,6 +20,17 @@ public class HFUTFileUtils {
   public static void writeList (String outFile, List<?> list, boolean append){
 
 //    FileUtils.writeLines();
+
+  }
+
+  //读取目录下文件的名字
+  public static Set<String> readFileNameByDirectory( String input_dir ){
+
+    Set<String> names = Sets.newHashSet();
+    for( File file : new File(input_dir).listFiles() ){
+      names.add(file.getName());
+    }
+    return names;
 
   }
 
