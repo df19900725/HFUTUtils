@@ -15,40 +15,105 @@ import java.util.*;
  */
 public class HFUTFileUtils {
 
-
-
-  public static void writeList (String outFile, List<?> list, boolean append){
-
-//    FileUtils.writeLines();
-
-  }
-
   //读取目录下文件的名字
-  public static Set<String> readFileNameByDirectory( String input_dir ){
+  public static Set<String> readFileNamesByDirectory( String inputDirectory ){
 
     Set<String> names = Sets.newHashSet();
-    for( File file : new File(input_dir).listFiles() ){
-      names.add(file.getName());
+
+    File inputPath = new File(inputDirectory);
+    if( inputPath.exists() && inputPath.isDirectory() ){
+
+      File[] fileList = inputPath.listFiles();
+
+      if( fileList != null ) {
+        for (File file : fileList) {
+          names.add(file.getName());
+        }
+      }
+
+    }else{
+
+      System.out.println("input directory does not exist or is not a directory!");
+
     }
+
+
     return names;
 
   }
 
-  public static HashMap<Object,Integer> readMap( String input_file, String delimiter ){
+  public static void readSampleFromFile( String inputFile, int num ){
 
-    HashMap<Object,Integer> map = Maps.newHashMap();
-    BufferedReader reader = read(input_file);
-    String lineTxt;
+    BufferedReader reader = read(inputFile,"UTF-8");
+    String lineTxt = "";
+    int count = 0;
     try {
       while ( (lineTxt=reader.readLine()) != null ){
-        String[] field = lineTxt.split(delimiter);
-        map.put(field[0], Integer.valueOf(field[1]));
+
+        System.out.println(lineTxt);
+        count++;
+        if( count%num == 0 ){
+
+          break;
+
+        }
 
       }
     } catch (IOException e) {
       e.printStackTrace();
     }
-    return  map;
+
+
+  }
+
+
+  /*********
+   * read directory to a map, key is the file name, value is the content
+   * @param inputDirectory : input directory
+   * @param encoding : the encoding of the files ********/
+  public static HashMap<String,String> readFileToMap( String inputDirectory, String encoding ){
+
+    HashMap<String,String> map = Maps.newHashMap();
+    File inputPath = new File(inputDirectory);
+    if( inputPath.exists() && inputPath.isDirectory() ){
+
+      File[] fileList = inputPath.listFiles();
+
+      if( fileList != null ) {
+        for (File file : fileList) {
+
+          try {
+            map.put(file.getName(), FileUtils.readFileToString(file, encoding));
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+
+        }
+      }
+
+    }else{
+      System.out.println("input directory does not exist or is not a directory!");
+    }
+    return map;
+
+  }
+
+  /*********
+   * read lines to a map, use delimiter to split each line
+   * @param input_path : input file
+   * @param delimiter : the delimiter of each line ********/
+  public static HashMap<String,Integer> readFileToMapByDelimiter( String input_path, String delimiter ){
+
+    HashMap<String,Integer> map = Maps.newHashMap();
+    try {
+      for( String line : FileUtils.readLines(new File(input_path), StandardCharsets.UTF_8)){
+        map.put(line.split(delimiter)[0], Integer.valueOf(line.split(delimiter)[1]));
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    return map;
 
   }
 
@@ -71,10 +136,12 @@ public class HFUTFileUtils {
 
   }
 
+
+
   /*******
    * get line number of one file
    * ************/
-  public static int getLineNumber (String inputFile ){
+  public static int getLineNumber (String inputFile ) throws IOException {
 
     return getLineNumber(new File(inputFile));
 
@@ -83,33 +150,41 @@ public class HFUTFileUtils {
   /*******
    * get line number of one file
    * ************/
-  public static int getLineNumber (File inputFile ){
+  public static int getLineNumber (File inputFile ) throws IOException {
 
-    BufferedReader reader = read(inputFile);
-    int count = 0;
+    InputStream is = new BufferedInputStream(new FileInputStream(inputFile));
     try {
-      while( reader.readLine() != null ){
+      byte[] c = new byte[1024];
+      int count = 0;
+      int readChars = 0;
+      boolean endsWithoutNewLine = false;
+      while ((readChars = is.read(c)) != -1) {
+        for (int i = 0; i < readChars; ++i) {
+          if (c[i] == '\n')
+            ++count;
+        }
+        endsWithoutNewLine = (c[readChars - 1] != '\n');
+      }
+      if(endsWithoutNewLine) {
         ++count;
       }
-    } catch (IOException e) {
-      e.printStackTrace();
+      return count;
+    } finally {
+      is.close();
     }
-
-    return count;
 
   }
 
   /*******
    * new a BufferedReader******/
-  public static BufferedReader read ( String input_path ){
+  public static BufferedReader read ( String input_path, String encoding ){
 
     try {
-      return new BufferedReader(new InputStreamReader( new FileInputStream(input_path), StandardCharsets.UTF_8));
-    } catch (FileNotFoundException e) {
+      return new BufferedReader(new InputStreamReader( new FileInputStream(input_path), encoding));
+    } catch (IOException e) {
       e.printStackTrace();
       return null;
     }
-
   }
 
   /*******
@@ -117,32 +192,58 @@ public class HFUTFileUtils {
   public static BufferedReader read ( File file ){
 
     try {
-      return new BufferedReader(new InputStreamReader( new FileInputStream(file), StandardCharsets.UTF_8));
-    } catch (FileNotFoundException e) {
+      return new BufferedReader(new InputStreamReader( new FileInputStream(file), "utf-8"));
+    } catch (IOException e) {
       e.printStackTrace();
       return null;
     }
 
   }
 
+  /*******
+   * new a BufferedReader******/
+  public static BufferedReader read ( String file ){
+
+    try {
+      return new BufferedReader(new InputStreamReader( new FileInputStream(file), "utf-8"));
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+
+  }
+
+  /*******
+   * new a BufferedReader******/
+  public static BufferedReader read ( File file, String encoding ){
+
+    try {
+      return new BufferedReader(new InputStreamReader( new FileInputStream(file), encoding));
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+
+  }
 
   /**********
-   * @content read file list from input path, remove all files existing in output path
+   * read file list from input path, remove all files existing in output path
    * @param input_file_path input directory path
    * @param output_file_path output directory path
    * *********/
   public static Collection<File> readFileList (String input_file_path, String output_file_path ){
 
     File input_file = new File(input_file_path);
-    Collection<File> file_list = new ArrayList<File>();
+    Collection<File> file_list = new ArrayList<>();
 
     if( input_file.isDirectory() ){
 
-      Collection<String> input_file_names = getFileNamesFromDir(input_file_path);
-      Collection<String> output_file_names = getFileNamesFromDir(output_file_path);
+      Collection<String> input_file_names = readFileNamesByDirectory(input_file_path);
+      Collection<String> output_file_names = readFileNamesByDirectory(output_file_path);
 
       input_file_names.removeAll(output_file_names);
-      input_file_names.forEach( file_name -> file_list.add(new File(checkDirectory(input_file_path)+file_name)));
+      input_file_names.forEach( file_name -> file_list.add(
+              new File(checkDirectory(input_file_path)+file_name)));
       return file_list;
 
     } else {
@@ -154,30 +255,15 @@ public class HFUTFileUtils {
 
   }
 
-  public static Collection<String> getFileNamesFromDir ( String input_directory ){
-
-
-    Collection<String> file_names = new ArrayList<String>();
-
-    FileUtils.listFiles(new File(input_directory),null,false).forEach( file -> file_names.add(file.getName()));
-
-    return  file_names;
-
-  }
-
   /**********
-   * @content read file list from input path, remove all files existing in output path
+   * read file list from input path, remove all files existing in output path
    * @param directory_path input directory path
    * *********/
   public static Collection<File> readFileList (String directory_path ){
 
-    File input_file = new File(directory_path);
+    if( new File(directory_path).isDirectory() ){
 
-    if( input_file.isDirectory() ){
-
-      Collection<File> input_files = FileUtils.listFiles(new File(directory_path), null,false);
-
-      return input_files;
+      return FileUtils.listFiles(new File(directory_path), null,false);
 
     } else {
 
@@ -193,14 +279,52 @@ public class HFUTFileUtils {
     if ( input_directory.endsWith("\\") || input_directory.endsWith("/") ){
       return input_directory + File.separator;
     }else{
-      return input_directory;
+      return input_directory + File.separator;
+    }
+
+  }
+
+  public static void createDirIfNotExist( String inputDir ){
+
+    File file = new File(inputDir);
+    if( !file.exists() ){
+      file.mkdirs();
+    }
+
+  }
+
+  public static void cleanFile(String inputFile,String delimiter, String encoding){
+
+    List<String> outList = Lists.newArrayList();
+    try {
+      for( String line : FileUtils.readLines(new File(inputFile), encoding)){
+        if( !line.equals("") ){
+          outList.add(line.replaceAll(delimiter + "+", delimiter));
+          System.out.println("line:\t"+line);
+        }
+      }
+
+      FileUtils.writeLines(new File(inputFile), outList);
+    } catch (IOException e) {
+      e.printStackTrace();
     }
 
 
   }
 
+
   public static void main(String[] args) {
-    System.out.println(checkDirectory("d://hell//"));
+
+    /*String inputPath = "F:\\experiment_data\\weibo_data\\personal\\weibo_content_seg\\weibo_content_jieba";
+    long start = System.currentTimeMillis();
+
+    readFileNamesByDirectory(inputPath);
+
+    long end = System.currentTimeMillis();
+    System.out.println("time:\t"+(end-start));*/
+
+    cleanFile("D:\\dhdp\\2-1.txt", "\t", "utf-8");
+
   }
 
 

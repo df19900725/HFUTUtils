@@ -11,16 +11,23 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * 单词过滤，包括去停用词等操作
+ *
+ * 所有的停用词必须用Set，这样的速度会快
+ * 对于待处理的列表，也必须使用LinkedList，这样速度也快
+ *
  * Created by DuFei on 2017/5/11.
  */
 public class WordFiltering {
 
+  static String delimiter = " ";
+  static String filter_pos = "/w|/x|/r|/c|/u|/e|/y|/o|/x|/m|/q|/d|/p|/vshi|/vyou|/eng|/vshi|/pba|/pbei";
 
   /*******
    * @content 去除停用词
@@ -33,7 +40,8 @@ public class WordFiltering {
     List<String> words = new ArrayList<>(Arrays.asList(sentence.split(delimiter)));
     try {
 
-      List<String> stopWordsList = FileUtils.readLines(new File(stop_words_file), StandardCharsets.UTF_8);
+      LinkedList<String> stopWordsList = new LinkedList<>(
+              FileUtils.readLines(new File(stop_words_file), StandardCharsets.UTF_8));
       words.removeAll(stopWordsList);
       return removeSentenceStopWords(sentence, delimiter, stopWordsList);
 
@@ -52,9 +60,11 @@ public class WordFiltering {
    * @param delimiter 词语的分隔符
    * @param stopWordsList 停用词列表
    * @return 去除停用词后的句子 *********/
-  public static String removeSentenceStopWords ( String sentence, String delimiter, List<String> stopWordsList ){
+  public static String removeSentenceStopWords ( String sentence, String delimiter,
+                                                 List<String> stopWordsList ){
 
-    List<String> words = new ArrayList<>(Arrays.asList(sentence.replaceAll(" +",delimiter).split(delimiter)));
+    LinkedList<String> words = new LinkedList<>(Arrays.asList(
+            sentence.replaceAll(" +",delimiter).split(delimiter)));
     words.removeAll(stopWordsList);
 
     String outStr = "";
@@ -77,13 +87,15 @@ public class WordFiltering {
    * @param delimiter 词语的分隔符
    * @param stopWordsList 停用词列表
    * @return 去除停用词后的句子 *********/
-  public static List<String> removeSentenceListStopWords ( List<String> sentences, String delimiter, List<String> stopWordsList ){
-
+  public static List<String> removeSentenceListStopWords (LinkedList<String> sentences,
+                                                          String delimiter, List<String> stopWordsList ){
+    int count = 0;
+    int sum = sentences.size();
     List<String> outList = Lists.newArrayList();
     for( String sentence : sentences ){
-
+      System.out.println("current index:"+count+"\tall size:"+sum);
       outList.add(removeSentenceStopWords(sentence, delimiter, stopWordsList ));
-
+      count++;
     }
 
     return outList;
@@ -96,11 +108,13 @@ public class WordFiltering {
    * @param delimiter 词语的分隔符
    * @param stop_words_file 停用词文件位置
    * @return 去除停用词后的句子 *********/
-  public static List<String> removeSentenceListStopWords ( List<String> sentences, String delimiter, String stop_words_file ){
+  public static List<String> removeSentenceListStopWords ( LinkedList<String> sentences,
+                                                           String delimiter, String stop_words_file ){
 
     try {
 
-      List<String> stopWordsList = FileUtils.readLines(new File(stop_words_file), StandardCharsets.UTF_8);
+      LinkedList<String> stopWordsList = new LinkedList<>(
+              FileUtils.readLines(new File(stop_words_file), StandardCharsets.UTF_8));
 
       return removeSentenceListStopWords(sentences, delimiter, stopWordsList);
 
@@ -119,7 +133,7 @@ public class WordFiltering {
    * @param delimiter 词语的分隔符
    * @param stopWordsFile 停用词文件位置
    * @return 去除停用词后的句子 *********/
-  public static List<String> removeStopWordsByFile ( String inputFile, String delimiter, String stopWordsFile ){
+  public static List<String> removeStopWordsByFile ( String inputFile, String encoding, String delimiter, String stopWordsFile ){
 
     List<String> stopWordsList = Lists.newArrayList();
     try {
@@ -128,7 +142,7 @@ public class WordFiltering {
       e.printStackTrace();
     }
 
-    return removeStopWordsByFile(inputFile,delimiter,stopWordsList);
+    return removeStopWordsByFile(inputFile,encoding,delimiter,stopWordsList);
 
   }
 
@@ -138,10 +152,10 @@ public class WordFiltering {
    * @param delimiter 词语的分隔符
    * @param stopWordsList 停用词列表
    * @return 去除停用词后的句子 *********/
-  public static List<String> removeStopWordsByFile ( String inputFile, String delimiter, List<String> stopWordsList ){
+  public static List<String> removeStopWordsByFile ( String inputFile,String encoding, String delimiter, List<String> stopWordsList ){
 
-    List<String> outList = Lists.newArrayList();
-    BufferedReader reader = HFUTFileUtils.read(inputFile);
+    LinkedList<String> outList = Lists.newLinkedList();
+    BufferedReader reader = HFUTFileUtils.read(inputFile,encoding);
     String lineTxt = "";
     try {
       while( (lineTxt = reader.readLine()) != null ){
@@ -164,7 +178,7 @@ public class WordFiltering {
    * @param delimiter 词语的分隔符
    * @param stopWordsList 停用词列表
    * @return 去除停用词后的句子 *********/
-  public static void removeStopWordsByDirectory ( String inputDir, String outputDir, String delimiter,
+  public static void removeStopWordsByDirectory ( String inputDir, String outputDir, String encoding, String delimiter,
                                                   List<String> stopWordsList ){
 
     if( !outputDir.endsWith(File.pathSeparator)){
@@ -172,7 +186,7 @@ public class WordFiltering {
     }
     for( File file : new File(inputDir).listFiles() ){
 
-      List<String> outList = removeStopWordsByFile(file.getAbsolutePath(),delimiter,stopWordsList);
+      List<String> outList = removeStopWordsByFile(file.getAbsolutePath(),encoding,delimiter,stopWordsList);
       try {
         FileUtils.writeLines(new File(outputDir+file.getName()), outList );
       } catch (IOException e) {
@@ -190,17 +204,67 @@ public class WordFiltering {
    * @param delimiter 词语的分隔符
    * @param stopWordsFile 停用词文件
    * @return 去除停用词后的句子 *********/
-  public static void removeStopWordsByDirectory ( String inputDir, String outputDir, String delimiter,
+  public static void removeStopWordsByDirectory ( String inputDir, String outputDir, String encoding, String delimiter,
                                                   String stopWordsFile ){
 
     List<String> stopWordsList = Lists.newArrayList();
     try {
-      stopWordsList = FileUtils.readLines(new File(stopWordsFile), StandardCharsets.UTF_8);
+      stopWordsList = FileUtils.readLines(new File(stopWordsFile), encoding);
     } catch (IOException e) {
       e.printStackTrace();
     }
 
-    removeStopWordsByDirectory(inputDir,outputDir,delimiter,stopWordsList);
+    removeStopWordsByDirectory(inputDir,outputDir,encoding, delimiter,stopWordsList);
+
+  }
+
+  /********
+   * 按标签过滤单词，输入为句子列表，指定的filter_pos为空的时候，采用默认过滤规则*****/
+  public static String filterSentenceByPOS ( String sentence ){
+
+    return filterSentenceByPOS(sentence, filter_pos, delimiter);
+
+  }
+
+  /********
+   * 按标签过滤单词，输入为句子列表，指定的filter_pos为空的时候，采用默认过滤规则*****/
+  public static String filterSentenceByPOS ( String sentence, String filter_pos ){
+
+    return filterSentenceByPOS(sentence, filter_pos, delimiter);
+
+  }
+
+  /********
+   * 按标签过滤单词，输入为句子列表*****/
+  public static List<String> filterSentenceListByPOS ( List<String> sentences, String filter_pos, String delimiter ){
+
+    List<String> sentenceList = Lists.newArrayList();
+
+    for( String sentence : sentences )
+      sentenceList.add(filterSentenceByPOS(sentence, filter_pos, delimiter));
+
+    return sentenceList;
+
+  }
+
+  /********
+   * 按标签过滤单词，输入为句子*******/
+  public static String filterSentenceByPOS ( String sentence, String filter_pos, String delimiter ){
+
+    String sentence_filtered = "";
+
+    for( String word : sentence.split(delimiter) ){
+      word = filterWordsByPOS( word, filter_pos );
+      if( word != null ){
+        sentence_filtered += word + delimiter;
+      }
+    }
+
+    if( !sentence_filtered.equals("") )
+      sentence_filtered = sentence_filtered.substring(0, sentence_filtered.length()-delimiter.length())
+              .replaceAll(delimiter+"+",delimiter).trim();
+
+    return sentence_filtered;
 
   }
 
@@ -219,54 +283,25 @@ public class WordFiltering {
    * *********/
   public static String filterWordsByPOS( String word, String filter_POS ){
 
-    String pattern = "";
-    if( filter_POS.equals("") ){
-      pattern = "/w|/x|/r|/c|/u|/y|/m|/q|/d|/p|/vshi|/vyou";
-    }
+    if( !filter_POS.equals("") )
+      filter_pos = filter_POS;
 
-    Pattern r = Pattern.compile(pattern);
-    Matcher m = r.matcher(" "+word);
+    Pattern r = Pattern.compile(filter_pos);
+    Matcher m = r.matcher(delimiter+word);
 
     if( word == null || word.trim().equals("") || m.find()){
 
       return null;
 
     }else{
-
-      return word.split("/")[0];
-
-    }
-
-  }
-
-  /********过滤句子中的某些词*****/
-  public static String filterWordsByPOS ( String sentence, String delimiter, String filter_pos ){
-
-    String sentence_filtered = "";
-
-    for( String word : sentence.split(delimiter) ){
-      word = filterWordsByPOS( word, filter_pos );
-      if( word != null ){
-        sentence_filtered += word + delimiter;
+      try{
+        return word.split("/")[0];
+      }catch (Exception e){
+        System.out.println("the word "+word+" is something wrong");
+        return  null;
       }
+
     }
-
-    if( !sentence_filtered.equals("") )
-      sentence_filtered = sentence_filtered.substring(0, sentence_filtered.length()-delimiter.length());
-
-    return sentence_filtered;
-
-  }
-
-  /********过滤句子中的某些词*****/
-  public static List<String> filterWordsByPOS ( List<String> sentences, String delimiter, String filter_pos ){
-
-    List<String> sentenceList = Lists.newArrayList();
-
-    for( String sentence : sentences )
-      sentenceList.add(filterWordsByPOS(sentence, delimiter, filter_pos));
-
-    return sentenceList;
 
   }
 
@@ -292,8 +327,12 @@ public class WordFiltering {
   public static List<String> removePOSTag ( List<String> sentences, String delimiter ){
 
     List<String> sentenceList = Lists.newArrayList();
-    for( String sentence : sentences )
+    int count = 0;
+    for( String sentence : sentences ){
+      System.out.println("count:"+count+"\tall size:"+sentences.size());
       sentenceList.add(removePOSTag(sentence,delimiter));
+      count++;
+    }
 
     return sentenceList;
 
@@ -301,15 +340,18 @@ public class WordFiltering {
 
   public static void main(String[] args) {
 
+    String original_text = "合肥工业大学简称合工大，位于安徽省省会合肥市，创建于1945年秋，1960年10月22日被中共中央批准为全国重点" +
+            "大学，是教育部直属高校，“211工程”和“985工程”优势学科创新平台项目建设高校，是一所以工科为主要特色，工、理、文、经、管、" +
+            "法、教育多学科的综合性高等院校。";
+
     NLPIR nlpir = new NLPIR("d:/nlpir/lib/win64/NLPIR","d:/nlpir/");
-    String sentence = nlpir.seg("#医生才知道#人体的脑血管就像水管一样，使用年头多了总会生锈，生锈了水管就会变窄，而锈" +
-            "斑掉下来会堵塞，脑部供血就会不足，会导致缺血性脑血管疾病。@神外费医生 建议家有老人或者存在中风危险因素的朋友，应学习了" +
-            "解中风的先兆表现和应急处理。N4大法则，迅速揪出中风！", 1);
-    System.out.println(sentence);
-    System.out.println(filterWordsByPOS(sentence," ", ""));
-    System.out.println(removePOSTag(sentence, " "));
-    System.out.println(removeSentenceStopWords(removePOSTag(sentence, " "), " ",
-            "F:/stop_words_hit.txt"));
+    String sentence = nlpir.seg(original_text, 1);    //分词后带标签
+    System.out.println("original text:\t" + original_text);
+    System.out.println("seg by NLPIR:\t" + sentence);
+    System.out.println("filtered by POS:\t" + WordFiltering.filterWordsByPOS(sentence," "));
+    System.out.println("remove POSTag:\t" + removePOSTag(sentence, " "));
+    System.out.println("filtered by stop words:\t" + removeSentenceStopWords(removePOSTag(sentence, " "), " ",
+            "F:/experiment_data/stop_words_hit"));
 
   }
 

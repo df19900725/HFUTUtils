@@ -11,7 +11,7 @@ public class CorpusTest {
     String inputFile = "d:/test.txt";
 
     //读取文件并保存语料
-    Corpus corpus = new Corpus(inputFile, false);
+    Corpus corpus = new Corpus(inputFile);
     System.out.println(corpus.docSize);
     System.out.println(corpus.wordSize);
     System.out.println(corpus.vocabularySize);

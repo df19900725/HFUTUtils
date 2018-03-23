@@ -23,21 +23,22 @@ public class WordCount {
 
     HashMap<String,Integer> wordCount = Maps.newHashMap();
     try {
-    for( File file : new File(input_dir).listFiles() ){
+      for( File file : new File(input_dir).listFiles() ){
 
-        for( String word : FileUtils.readFileToString(file, StandardCharsets.UTF_8).split(delimiter) ){
-          word = word.trim();
-          if( !word.equals("") ) {
-            if (wordCount.containsKey(word)) {
-              wordCount.put(word, wordCount.get(word) + 1);
-            } else {
-              wordCount.put(word, 1);
+          for( String word : FileUtils.readFileToString(file, StandardCharsets.UTF_8)
+                  .replace("\r\n",delimiter).replace("\n",delimiter).split(delimiter) ){
+            word = word.trim();
+            if( !word.equals("") ) {
+              if (wordCount.containsKey(word)) {
+                wordCount.put(word, wordCount.get(word) + 1);
+              } else {
+                wordCount.put(word, 1);
+              }
             }
+
           }
 
-        }
-
-    }
+      }
 
     } catch (IOException e) {
       e.printStackTrace();

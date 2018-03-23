@@ -81,7 +81,7 @@ public class NLPIR {
   public String seg(String sentence, int bPOSTagged) {
 
     String outStr = CLibrary.Instance.NLPIR_ParagraphProcess(sentence, bPOSTagged);
-    CLibrary.Instance.NLPIR_Exit();
+//    CLibrary.Instance.NLPIR_Exit();
     return outStr;
 
   }
@@ -89,7 +89,7 @@ public class NLPIR {
   public String segWithoutTag(String sentence) {
 
     String outStr = CLibrary.Instance.NLPIR_ParagraphProcess(sentence, 0);
-    CLibrary.Instance.NLPIR_Exit();
+//    CLibrary.Instance.NLPIR_Exit();
     return outStr;
 
   }
@@ -259,7 +259,7 @@ public class NLPIR {
       }
 
       try {
-        FileUtils.writeLines(new File(output_dir+File.pathSeparator+entry.getKey()), list);
+        FileUtils.writeLines(new File(output_dir+File.separator+entry.getKey()), list);
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -277,6 +277,9 @@ public class NLPIR {
     String dictPath = "F:\\DPMM\\dict.txt";
 
     NLPIR nlpir = new NLPIR("d:/nlpir/lib/win64/NLPIR","d:/nlpir/");
+
+    System.out.println(nlpir.seg(sInput,1));
+    nlpir.seg(sInput,0);
 //    CLibrary.Instance.NLPIR_ImportUserDict(dictPath,true);
     /*CLibrary.Instance.NLPIR_AddUserWord("微博");
     System.out.println(nlpir.segWithUserDict(Lists.newArrayList(sInput),dictPath,0));

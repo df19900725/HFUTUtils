@@ -1,6 +1,9 @@
 package org.hfutec.nlp.model;
 
-import com.google.common.collect.*;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.hfutec.io.HFUTFileUtils;
 
@@ -13,12 +16,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 语料模型，必须是已经分词好的文档
+ * 语料模型
  * Created by DuFei on 2017/5/22.
  */
-public class Corpus {
+public class CorpusL {
 
-  public String inputPath;
+  public String input_dir;
   public File inputFile;
   public String charset = "UTF-8";
   public String delimiter = " ";
@@ -32,42 +35,39 @@ public class Corpus {
   public int wordSize = 0;      //词汇数量（包含重复）
   public int vocabularySize = 0;      //单词数量（不重复）
 
-  public BiMap<String,Integer> docIndex = HashBiMap.create();     //文档索引
-  public BiMap<String,Integer> wordIndex = HashBiMap.create();    //单词索引
-  public Map<Integer,Map<Integer,Integer>> sparseVSMOfDocs = Maps.newHashMap();  //文档的稀疏空间表示
-  public Map<Integer,HashSet<Integer>> wordDocs = Maps.newHashMap(); //单词对应的文档编号
-  public Map<Integer,Integer> wordCount = Maps.newHashMap();      //单词计数，即每个单词对应的数量，单词用索引表示
-  public Map<Integer,HashSet<Integer>> docWords = Maps.newHashMap();  //文档中包含的单词
-  public int[] documentSizes;
+  public HashBiMap<String,Integer> docIndex = HashBiMap.create();     //文档索引
+  public HashBiMap<String,Integer> wordIndex = HashBiMap.create();    //单词索引
+  public HashMap<Integer,HashMap<Integer,Integer>> sparseVSMOfDocs = Maps.newHashMap();  //文档的稀疏空间表示
+  public HashMap<Integer,HashSet<Integer>> wordDocs = Maps.newHashMap(); //单词对应的文档编号
 
-  public Corpus(){}
+  public CorpusL(){}
 
   /********
    * 输入是文件夹的构造方法
    */
-  public Corpus( String inputPath ){
+  public CorpusL(String input_dir ){
 
-    this.inputPath = inputPath;
-    this.inputFile = new File(inputPath);
+    this.input_dir = input_dir;
+    this.inputFile = new File(input_dir);
 
     init();
 
   }
 
-  public Corpus( String inputPath, String charset ){
+  public CorpusL(String input_dir, String charset ){
 
-    this.inputPath = inputPath;
-    this.inputFile = new File(inputPath);
+    this.input_dir = input_dir;
+    this.inputFile = new File(input_dir);
     this.charset = charset;
 
     init();
 
   }
 
-  public Corpus( String inputPath, String delimiter, String charset ){
+  public CorpusL(String input_dir, String delimiter, String charset ){
 
-    this.inputPath = inputPath;
-    this.inputFile = new File(inputPath);
+    this.input_dir = input_dir;
+    this.inputFile = new File(input_dir);
     this.delimiter = delimiter;
     this.charset = charset;
 
@@ -80,7 +80,7 @@ public class Corpus {
     if( inputFile.exists() ){
 
       System.out.println("Initialization successful!");
-      System.out.println("Input path:"+inputPath);
+      System.out.println("Input path:"+input_dir);
 
       if( inputFile.isDirectory() ){
 
@@ -93,7 +93,7 @@ public class Corpus {
       }
     }else{
       System.out.println("Initialization failed! The input file or directory does not exist!");
-      System.out.println("Input path:"+inputPath);
+      System.out.println("Input path:"+input_dir);
     }
 
 
@@ -101,14 +101,7 @@ public class Corpus {
 
   private void parseDocsByFile(){
 
-    BufferedReader reader = HFUTFileUtils.read(inputPath,charset);
-
-    try {
-      System.out.println(HFUTFileUtils.getLineNumber(inputPath));
-      documentSizes = new int[HFUTFileUtils.getLineNumber(inputPath)];
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    BufferedReader reader = HFUTFileUtils.read(input_dir,"utf-8");
     String lineTxt;
     int lineNumber = 0;
     try {
@@ -129,7 +122,7 @@ public class Corpus {
 
   private void parseDocs (){
 
-    File[] fileList = new File(inputPath).listFiles();
+    File[] fileList = new File(input_dir).listFiles();
     docSize = fileList.length;
 
     for( File file : fileList ){
@@ -200,25 +193,20 @@ public class Corpus {
     HashSet<Integer> words = Sets.newHashSet();
     content = content.replaceAll(delimiter+"+",delimiter);
 
-    int wordNumberOfEachDoc = 0;
-
     for( String word : content.split(delimiter) ){
 
       if( !word.equals("") ) {
-        wordNumberOfEachDoc++;
         wordSize++;
         //解析全局单词索引
         int wordID;
         if (wordIndex.containsKey(word)) {
           wordID = wordIndex.get(word);
           wordDocs.get(wordID).add(docID);
-          wordCount.put(wordID, wordCount.get(wordID) + 1);
         } else {
           vocabularySize++;
           wordID = wordIndex.size();
           wordIndex.put(word, wordID);
           wordDocs.put(wordID, Sets.newHashSet(docID));
-          wordCount.put(wordID, 1);
         }
 
         //解析全局单词-文档
@@ -239,8 +227,6 @@ public class Corpus {
 
     }
 
-    documentSizes[docID] = wordNumberOfEachDoc;
-    docWords.put(docID, words);
     sparseVSMOfDocs.put(docID, wordCountOfDoc);
 
   }
@@ -251,6 +237,15 @@ public class Corpus {
     saveDocIndex();
     saveWordIndex();
     saveSparseVSMOfDocs();
+
+  }
+
+  public void loadCorpus( String saveDir ){
+
+    this.saveDir = saveDir;
+    loadDocIndex();
+    loadWordIndex();
+    loadSparseVSM();
 
   }
 
@@ -269,7 +264,7 @@ public class Corpus {
   private void saveSparseVSMOfDocs(){
 
     List<String> list = Lists.newArrayList();
-    for( Map.Entry<Integer,Map<Integer,Integer>> docEntry : sparseVSMOfDocs.entrySet()){
+    for( Map.Entry<Integer,HashMap<Integer,Integer>> docEntry : sparseVSMOfDocs.entrySet()){
 //      String line = docEntry.getKey()+" ";
       String line = "";
       for(Map.Entry entry : docEntry.getValue().entrySet() ){
@@ -282,15 +277,6 @@ public class Corpus {
     } catch (IOException e) {
       e.printStackTrace();
     }
-
-  }
-
-  public void loadCorpus( String saveDir ){
-
-    this.saveDir = saveDir;
-    loadDocIndex();
-    loadWordIndex();
-    loadSparseVSM();
 
   }
 
@@ -321,13 +307,13 @@ public class Corpus {
         String[] field = lineTxt.split("\t");
         int count = Integer.valueOf(field[1]);
         wordIndex.put(field[0],count);
-        wordSize += count;
+        vocabularySize += count;
 
       }
     } catch (IOException e) {
       e.printStackTrace();
     }
-    vocabularySize = wordIndex.size();
+    wordSize = wordIndex.size();
     System.out.println("word size:"+wordSize);
 
   }
@@ -358,31 +344,17 @@ public class Corpus {
   private void loadSparseVSM(){
 
     BufferedReader reader = HFUTFileUtils.read(saveDir+"/"+sparseVSMFile,"utf-8");
-
     String lineTxt;
     try {
       int docID = 0;
       while ( (lineTxt=reader.readLine()) != null ){
 
         String[] field = lineTxt.split(" ");
-        docWords.put(docID, Sets.newHashSet());
+
         sparseVSMOfDocs.put(docID, new HashMap<>());
         for( int i=1; i<field.length; i++ ){
           String[] words = field[i].split(":");
-
-          int wordIndex = Integer.valueOf(words[0]);
-          int wordCount = Integer.valueOf(words[1]);
-
-          sparseVSMOfDocs.get(docID).put(wordIndex, wordCount);
-
-          if( wordDocs.containsKey(wordIndex) ){
-            wordDocs.get(wordIndex).add(docID);
-          }else{
-            wordDocs.put(wordIndex, Sets.newHashSet(docID));
-          }
-
-          docWords.get(docID).add(wordIndex);
-
+          sparseVSMOfDocs.get(docID).put(Integer.valueOf(words[0]), Integer.valueOf(words[1]));
         }
         docID++;
 
@@ -415,14 +387,12 @@ public class Corpus {
       System.out.println(i+"\t"+corpus.sparseVSMOfDocs.get(i));
     }*/
 
-//    String corpus_file = "F:\\experiment_data\\reuters_data\\reuters_with_nltk_filtered_no_title";
+    String corpus_file = "F:\\experiment_data\\reuters_data\\reuters_with_nltk_filtered_no_title";
 //    String word_vect_file = "F:\\experiment_data\\reuters_data\\reuters_vector_50.txt";
 //    String output = "F:\\experiment_data\\reuters_data\\reuters_vector_50_id.txt";
-    String corpus_file = "d:/dhdp/input.txt";
 
-    Corpus corpus = new Corpus(corpus_file,"gbk");
-
-    System.out.println(corpus.wordSize+"\tvocabulary size:"+corpus.vocabularySize);
+    CorpusL corpus = new CorpusL(corpus_file);
+    System.out.println(corpus.wordSize);
 
   }
 

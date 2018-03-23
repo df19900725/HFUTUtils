@@ -43,22 +43,29 @@ System.out.println("filtered by stop words:\t" + WordFiltering.removeSentenceSto
 
 //读取文件并保存语料
 
-Corpus corpus = new Corpus(inputFile, false);
+Corpus corpus = new Corpus(inputFile, "utf-8");
 
-corpus.saveCorpus(inputFile);
+//保存到某个文件夹中，会生成三个文件
+corpus.saveCorpus(outputPath);
+
+Corpus会自动计算将文本单词转换成索引，也就是每个单词对应一个int值，从0开始，可自动得到很多属性
+1）单词和其对应的索引（BiMap格式）
+
+2）稀疏矩阵，即每个文档下不同单词的数量（单词数为0不保存）
+
+3）每个单词对应的文档集合，即某个单词被哪些文档包含过
+
+4）单词数量word count
+
+5）文档数
+
+6）单词数（包含重复）
+
+7）词汇数（不同单词数量）
 
 //载入之前保存的语料
 
 Corpus corpusLoading = new Corpus();
 
-corpusLoading.loadCorpus(inputFile);
+corpusLoading.loadCorpus(outputPath);
 
-//输入是文件夹的测试，去掉false参数即可
-
-String inputDir = "D:/test";
-
-String outputDir = "d:/test_out";
-
-Corpus corpusDir = new Corpus(inputDir);
-
-corpusDir.saveCorpus(outputDir);

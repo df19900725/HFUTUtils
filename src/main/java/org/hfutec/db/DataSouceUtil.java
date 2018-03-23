@@ -9,6 +9,9 @@ import javax.sql.DataSource;
  */
 public class DataSouceUtil {
 
+  /*******
+   * uri:jdbc:mysql://127.0.0.1:3306
+   * **********/
   public static DataSource getDataSource(String connectURI){
 
     BasicDataSource ds = new BasicDataSource();
