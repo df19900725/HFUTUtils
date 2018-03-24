@@ -19,7 +19,7 @@
 
 这是一个增强的文件操作，提供了集中方便读取文件的方法。Apache Commons IO已经提供了很多很好文件操作了。这里补充了一些没有但很实用的。
 
-```
+```java
 //从输入文件目录中读取文件，并去除输出目录中存在的文件。通常我们需要读取一些某个目录下所有的文件，但是又想去掉一些在目标目录中存在的文件，可以使用如下方法。
 String source_directory = "d:/source";
 String target_directory = "d:/target";
