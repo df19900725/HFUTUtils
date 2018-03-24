@@ -7,6 +7,24 @@
 
 可以直接看源码文件，也可以直接下载jar包引入到工程中。注意，本项目使用jdk8+。使用Maven方式导入了Google Guava、Apache Commons等包。可以直接下载查看pom.xml文件后，添加到自己的项目中。
 
+-----------文件操作 HFUTFileUtils-----------
+这是一个增强的文件操作，提供了集中方便读取文件的方法。Apache Commons IO已经提供了很多很好文件操作了。这里补充了一些没有但很实用的。
+
+//从输入文件目录中读取文件，并去除输出目录中存在的文件。通常我们需要读取一些某个目录下所有的文件，但是又想去掉一些在目标目录中存在的文件，可以使用如下方法。
+String source_directory = "d:/source";
+String target_directory = "d:/target";
+Collection<File> files = HFUTFileUtils.readFileList(source_directory, target_directory);
+//读取某个文件夹下所有文件的名字到List中
+String inputDirectory = "D:/test";
+Collection<String> fileNames = HFUTFileUtils.readFileNameByDirectory(inputDirectory);
+//获取某个文件的总行数
+int lineNumber = HFUTFileUtils.getLineNumber(inputDirectory);
+//将一个Map键值对写入到一个文件中
+HashMap<String,Integer> map = new HashMap<String,Integer>();
+map.put("test",1);
+HFUTFileUtils.save2DMap(inputDirectory, map);
+
+
 -----------分词用法-----------
 
 分词集成了张华平分词 具体使用方式可参考 初始化NLPIR，传入Data文件夹和lib文件夹位置的参数，然后就可以分词了，注意授权文件的更新日期
