@@ -1,7 +1,15 @@
 # HFUTUtils
 这是一个工具程序集合，方便我们平时处理数据。针对文本处理的内容较多。
 
-详细的使用方法和案例参考：http://www.datalearner.com/blog/1051494253501911
+详细的使用方法和案例参考：[HFUTUtils的使用 | 数据学习者官方网站（DataLearner）](http://www.datalearner.com/blog/1051494253501911)
+
+
+[TOC]
+
+
+##### 文件操作增强类HFUTFileUtils
+##### 张华平分词和结巴分词 NLPIR/Jieba
+##### 语料模型Corpus
 
 -----------使用方法-----------
 
@@ -11,6 +19,7 @@
 
 这是一个增强的文件操作，提供了集中方便读取文件的方法。Apache Commons IO已经提供了很多很好文件操作了。这里补充了一些没有但很实用的。
 
+```
 //从输入文件目录中读取文件，并去除输出目录中存在的文件。通常我们需要读取一些某个目录下所有的文件，但是又想去掉一些在目标目录中存在的文件，可以使用如下方法。
 
 String source_directory = "d:/source";
@@ -49,6 +58,7 @@ BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputSt
 //改写后的写法
 BufferedReader reader = HFUTFileUtils.read(file, "utf-8");
 
+```
 
 -----------分词用法-----------
 
