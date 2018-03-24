@@ -7,7 +7,7 @@
 [TOC]
 
 
-##### [文件操作增强类HFUTFileUtils](#####HFUTFileUtils)
+##### [文件操作增强类HFUTFileUtils](#HFUTFileUtils)
 ##### 张华平分词和结巴分词 NLPIR/Jieba
 ##### 语料模型Corpus
 
@@ -15,7 +15,7 @@
 
 可以直接看源码文件，也可以直接下载jar包引入到工程中。注意，本项目使用jdk8+。使用Maven方式导入了Google Guava、Apache Commons等包。可以直接下载查看pom.xml文件后，添加到自己的项目中。
 
-##### HFUTFileUtils
+#### HFUTFileUtils
 
 这是一个增强的文件操作，提供了集中方便读取文件的方法。Apache Commons IO已经提供了很多很好文件操作了。这里补充了一些没有但很实用的。
 
