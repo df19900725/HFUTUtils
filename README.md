@@ -8,32 +8,75 @@
 可以直接看源码文件，也可以直接下载jar包引入到工程中。注意，本项目使用jdk8+。使用Maven方式导入了Google Guava、Apache Commons等包。可以直接下载查看pom.xml文件后，添加到自己的项目中。
 
 -----------文件操作 HFUTFileUtils-----------
+
 这是一个增强的文件操作，提供了集中方便读取文件的方法。Apache Commons IO已经提供了很多很好文件操作了。这里补充了一些没有但很实用的。
 
 //从输入文件目录中读取文件，并去除输出目录中存在的文件。通常我们需要读取一些某个目录下所有的文件，但是又想去掉一些在目标目录中存在的文件，可以使用如下方法。
+
 String source_directory = "d:/source";
+
 String target_directory = "d:/target";
+
 Collection<File> files = HFUTFileUtils.readFileList(source_directory, target_directory);
+
 //读取某个文件夹下所有文件的名字到List中
+
 String inputDirectory = "D:/test";
+
 Collection<String> fileNames = HFUTFileUtils.readFileNameByDirectory(inputDirectory);
+
 //获取某个文件的总行数
+
 int lineNumber = HFUTFileUtils.getLineNumber(inputDirectory);
+
 //将一个Map键值对写入到一个文件中
+
 HashMap<String,Integer> map = new HashMap<String,Integer>();
+
 map.put("test",1);
+
 HFUTFileUtils.save2DMap(inputDirectory, map);
+
+//将一个两列的文件读入到一个Map中，第一个参数是文件输入的路径或者是File，第二个参数是列的分隔符
+
+HashMap<String,Integer> map = HFUTFileUtils.readFileToMapByDelimiter(file,"\t");
+
+//使用BufferedReader读取文件，原生的Java使用BufferedReader有一长串，我们改写了其中部分
+
+//原生写法
+BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "utf-8"));
+
+//改写后的写法
+BufferedReader reader = HFUTFileUtils.read(file, "utf-8");
 
 
 -----------分词用法-----------
 
-分词集成了张华平分词 具体使用方式可参考 初始化NLPIR，传入Data文件夹和lib文件夹位置的参数，然后就可以分词了，注意授权文件的更新日期
+分词集成了张华平分词 具体使用方式可参考 初始化NLPIR，传入Data文件夹和lib文件夹位置的参数，然后就可以分词了，注意授权文件的更新日期，在博客中我们提供了更多的使用案例，可以参考。
 
 NLPIR nlpir = new NLPIR("d:/nlpir/lib/win64/NLPIR","d:/nlpir/");
 
 String output_text1 = nlpir.seg(input_text1, 0);
 
 System.out.println(output_text1);
+
+我们还提供了结巴分词，结巴分词的功能相对较少，它原本是Python版本的，有人将其转换成Java版本，也非常好用，为了避免还要去下载，本程序这里就集成了一下结巴分词。在返回结果上去掉了原来java版本的词语位置信息。默认使用的是原来的SEARCH模式分词，原来的Java版本依然可用。
+
+结巴分词：https://github.com/fxsjy/jieba
+
+结巴分词（Java）：https://github.com/huaban/jieba-analysis
+
+
+Jieba jieba = new Jieba();
+
+List<String> outList = jieba.seg(input_text_list);
+
+for (String sentence : outList) {
+
+  System.out.println(sentence);
+
+}
+
 
 -----------过滤单词-----------
 
