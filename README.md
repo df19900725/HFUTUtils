@@ -9,7 +9,7 @@
 
 ##### [一、文件操作增强类HFUTFileUtils](#hfutfileutils)
 ##### [二、张华平分词和结巴分词 NLPIR/Jieba](#NLPIR/Jieba分词)
-##### [三、语料模型Corpus](#Corpus)
+##### [三、语料模型Corpus](#corpus)
 
 
 -----------使用方法-----------
