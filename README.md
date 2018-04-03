@@ -10,7 +10,7 @@
 ##### [一、文件操作增强类HFUTFileUtils](#hfutfileutils)
 ##### [二、张华平分词和结巴分词 NLPIR/Jieba](#NLPIR/Jieba分词)
 ##### [三、语料模型Corpus](#corpus)
-##### [四、文本预处理TextIO](#DataIOUtils)
+##### [四、文本预处理DataIOUtils](#DataIOUtils)
 
 
 -----------使用方法-----------
@@ -221,8 +221,8 @@ String outputPath = "dummies";
 int[] cols = {4,5,11,13};       //读取哪几列就把那几列组成数组传进去
 
 //第一个参数数输入错文件，第二个参数是列分隔符，第三个参数是选择哪几列，第四个参数是输出位置
-TextIO.readColumnData(inputFile, " ", cols, someColumnDataPath);
+DataIOUtils.readColumnData(inputFile, " ", cols, someColumnDataPath);
 
 //输入位置，输出位置和分隔符
-TextIO.getDummies(someColumnDataPath, outputPath, " ");
+DataIOUtils.getDummies(someColumnDataPath, outputPath, " ");
 ```
