@@ -270,7 +270,6 @@ public class Corpus {
 
     List<String> list = Lists.newArrayList();
     for( Map.Entry<Integer,Map<Integer,Integer>> docEntry : sparseVSMOfDocs.entrySet()){
-//      String line = docEntry.getKey()+" ";
       String line = "";
       for(Map.Entry entry : docEntry.getValue().entrySet() ){
         line += entry.getKey()+":"+entry.getValue()+" ";
