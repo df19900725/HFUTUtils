@@ -67,17 +67,24 @@ public class WordFiltering {
             sentence.replaceAll(" +",delimiter).split(delimiter)));
     words.removeAll(stopWordsList);
 
-    String outStr = "";
+//    String outStr = "";
+//    for( String word : words ){
+//      if( !word.equals(""))
+//        outStr += word+delimiter;
+//    }
+
+    String outStr1 = "";
+    StringBuilder outStr = new StringBuilder();
     for( String word : words ){
       if( !word.equals(""))
-        outStr += word+delimiter;
+        outStr.append(word+delimiter);
     }
 
     if( outStr.length()>0){
-      outStr = outStr.substring(0,outStr.length()-delimiter.length()).trim();
+      outStr1 = outStr.toString().substring(0,outStr.toString().length()-delimiter.length()).trim();
     }
 
-    return outStr;
+    return outStr1;
 
   }
 

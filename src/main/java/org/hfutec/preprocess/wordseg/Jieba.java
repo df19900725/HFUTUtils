@@ -32,11 +32,19 @@ public class Jieba {
 
     for( String sentence : sentences ){
       List<SegToken> tokens = segmenter.process(sentence, JiebaSegmenter.SegMode.SEARCH);
-      String outStr = "";
+//      String outStr = "";
+//      for( SegToken segToken : tokens ){
+//        outStr += segToken.word+" ";
+//      }
+//      outList.add(outStr);
+//    }
+
+
+      StringBuilder stringBuilder = new StringBuilder();
       for( SegToken segToken : tokens ){
-        outStr += segToken.word+" ";
+        stringBuilder.append(segToken.word + " ");
       }
-      outList.add(outStr);
+      outList.add(String.valueOf(stringBuilder));
     }
 
     return outList;
